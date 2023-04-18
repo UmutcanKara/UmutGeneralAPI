@@ -1,4 +1,5 @@
-use crate::routes::get_cookies::get_cookies;
+use crate::routes::auth::crypt::encrypt;
+use crate::routes::auth::get_cookies::get_cookies;
 use crate::{
     db::{
         db::establish_connection,
@@ -31,17 +32,16 @@ pub fn post_register(
     auth_state: &State<AuthState>,
 ) -> Result<Json<ResultMessage>, String> {
     let conn = &mut establish_connection();
+
     let new_user = NewUser {
         name: &user.name,
         email: &user.email,
-        password: &user.password,
+        password: &encrypt(&user.password),
     };
 
     let result = diesel::insert_into(users::table)
         .values(&new_user)
         .get_result::<User>(conn);
-
-    print!("{:?}", result);
 
     match result {
         Ok(_) => {

@@ -1,3 +1,4 @@
+use crate::routes::auth::crypt::decrypt;
 use crate::{
     db::{
         db::establish_connection,
@@ -6,7 +7,7 @@ use crate::{
     state::auth::AuthState,
 };
 
-use crate::routes::{get_cookies::get_cookies, post_register::ResultMessage};
+use crate::routes::auth::{get_cookies::get_cookies, post_register::ResultMessage};
 use diesel::prelude::*;
 use rocket::{http::CookieJar, serde::json::Json, State};
 
@@ -37,6 +38,6 @@ pub fn post_login(
 }
 
 fn compare_users(user: &User, new_user: &NewUser) -> bool {
-    user.email == new_user.email && user.password == new_user.password
+    user.email == new_user.email && decrypt(user.password.as_str(), new_user.password.as_bytes())
     // todo!("Decrypt password then compare");
 }
